@@ -85,15 +85,6 @@ proc load_List { ListName {fileName "debug.dat"} } {
 
 }
 
-proc create_New_Proj_Name { srcDir  } {
-
-    set var [ split $srcDir "/" ]
-    set projectDir  [lindex $var [ expr { [ llength $var ] - 1 } ] ]
-    set projectDir_New [concat New_$projectDir ] 
-    return  $projectDir_New
-}
-
-
 proc getProjName { srcDir } {
     # Find project dir Name
     set projectDir [ split $srcDir "/" ]
@@ -154,18 +145,22 @@ proc copyProjFiles { srcDir fileList } {
     }  
 }
 
-# Make sure Project dir is under User Documents folder
+# Set the baseDir to project path
+# Set fileType_To_Search to desired file that user want to copy from project directory
+# Script will create new poject with same Name with New_ as prefix added to it @ same dir level
+
 set Create_New_Proj_Dir Create_New_Proj_Dir
  if {$Create_New_Proj_Dir=="Create_New_Proj_Dir"} {  
+
+    set baseDir /home/ssingh/Documents/Project/Tcl
+
+    # List of file type to search in base Dir
+    set fileType_To_Search {*.tcl *.txt }    
 
     set systemTime [clock seconds]
 
     set desired_Format [clock format $systemTime -format {%H_%M_%S} ]
 
-    set baseDir /home/ssingh/Documents/Project/Tcl
-
-    # List of file type to search in base Dir
-    set fileType_To_Search {*.tcl *.txt }
 
 
     foreach item $fileType_To_Search {

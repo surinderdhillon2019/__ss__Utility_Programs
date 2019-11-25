@@ -100,7 +100,6 @@ proc getProjName_New { srcDir } {
 
 # create dir structure in Downloads dir
 proc copyProjDirStructure { srcDir fileType debugFile } {
-    set systemTime [clock seconds]
 
     set fileList [ findFiles $srcDir $fileType ]
     load_List $fileList  $debugFile
@@ -112,7 +111,7 @@ proc copyProjDirStructure { srcDir fileType debugFile } {
     # Find project dir Name
     set projName     [getProjName $srcDir] 
     set projName_New [getProjName_New $srcDir]
-
+    puts $projName_New
     foreach item $dirList {
         lappend dirList_new [string map [ list $projName $projName_New ]  $item ]
     }    
@@ -145,27 +144,52 @@ proc copyProjFiles { srcDir fileList } {
     }  
 }
 
-# Set the baseDir to project path
-# Set fileType_To_Search to desired file that user want to copy from project directory
-# Script will create new poject with same Name with New_ as prefix added to it @ same dir level
 
-set Create_New_Proj_Dir Create_New_Proj_Dir
- if {$Create_New_Proj_Dir=="Create_New_Proj_Dir"} {  
-
-    set baseDir /home/ssingh/Documents/Project/Tcl
-
-    # List of file type to search in base Dir
-    set fileType_To_Search {*.tcl *.txt }    
-
-    set systemTime [clock seconds]
-
-    set desired_Format [clock format $systemTime -format {%H_%M_%S} ]
+# ****************************************** Main Function ******************************************************
+# ****************************************** Main Function ******************************************************
+# ****************************************** Main Function ******************************************************
+# ****************************************** Main Function ******************************************************
 
 
+            # Set the baseDir to project path
+            # Set fileType_To_Search to desired file that user want to copy from project directory
+            # Script will create new poject with same Name with New_ as prefix added to it @ same dir level
 
-    foreach item $fileType_To_Search {
-        set fileToWrite [concat ../debug_Files/Debug_[ string trim $item *. ]_$desired_Format.dat]
-        copyProjFiles $baseDir [ copyProjDirStructure $baseDir $item $fileToWrite ]
+                set systemTime [clock seconds]
+                set desired_Format [clock format $systemTime -format {%H_%M_%S} ]
 
-    }       
- }
+                if { $argc < 1} {
+                    puts " \n\n******************** User must define at least project Dir Path ****************************\n\n"
+                    puts " \n\n********************             Use case Example               ****************************\n\n"
+                    puts "tclsh file_IO_command.tcl /home/Project/INIPARSER\n\n"
+                } else {
+                
+                    set baseDir [lindex $argv 0] 
+
+                    if { $argc > 1 } {
+                        set fileType_To_Search {}
+                        set skipFirst true
+                        foreach item $argv {
+                            if {  $skipFirst != "true"  } {
+                                puts "$item "
+                                lappend fileType_To_Search $item 
+                            }
+                            set skipFirst false
+                        }
+                    } else {
+                        # List of file type to search in base Dir
+                        puts "I m here"
+                        set fileType_To_Search {*.tcl *.txt }   
+                    }
+                    foreach item $fileType_To_Search {
+                        
+                        set fileToWrite [concat ../debug_Files/Debug_[ string trim $item *. ]_$desired_Format.dat]                        
+                        copyProjFiles $baseDir [ copyProjDirStructure $baseDir $item $fileToWrite ]
+                    }
+                }
+
+
+# ****************************************** End Function ******************************************************
+# ****************************************** End Function ******************************************************
+# ****************************************** End Function ******************************************************
+# ****************************************** End Function ******************************************************

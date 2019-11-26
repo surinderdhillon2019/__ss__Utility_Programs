@@ -1,34 +1,10 @@
-# file provides three sets of functionality: 
-#     String manipulation appropriate to parsing file names
-#         dirname ........ Returns directory portion of path
-#         extension ........ Returns file name extension
-#         join ........ Join directories and the file name to one string
-#         nativename ....... Returns the native name of the file/directory
-#         rootname ....... Returns file name without extension
-#         split ........ Split the string into directory and file names
-#         tail .................... Returns filename without directory 
-#     Information about an entry in a directory:
-#         atime ................ Returns time of last access
-#         executable ..... Returns 1 if file is executable by user
-#         exists ................ Returns 1 if file exists
-#         isdirectory ...... Returns 1 if entry is a directory
-#         isfile .................. Returns 1 if entry is a regular file
-#         lstat ................... Returns array of file status information
-#         mtime ............... Returns time of last data modification
-#         owned ................ Returns 1 if file is owned by user
-#         readable ............ Returns 1 if file is readable by user
-#         readlink ............. Returns name of file pointed to by a symbolic link
-#         size ..................... Returns file size in bytes
-#         stat ..................... Returns array of file status information
-#         type .................... Returns type of file
-#         writable ............ Returns 1 if file is writeable by user 
-#     Manipulating the files and directories themselves:
-#         copy ................ Copy a file or a directory
-#         delete ................ Delete a file or a directory
-#         mkdir ................ Create a new directory
-#         rename ................ Rename or move a file or directory 
-# 
 
+# This script takes in atleast one argument along with multiple other arguments 
+# < Arg 1 >      : Full Path of project direcotry
+# < Arg 2 - N  > : (Optional Arg) File type to extract from project dir Ex : *.c *.h *.tcl *vhd
+
+
+# This will recursively search all files under baseDir of input pattern
 proc findFiles { basedir pattern } {
     set basedir [ string trimright [ file join [file normalize $basedir] { } ] ]
     set fileList {}
@@ -49,7 +25,7 @@ proc findFiles { basedir pattern } {
     return $fileList  
 }
 
-
+# check if directory already exist in dirList
 proc is_member { dirList dirName } {
     foreach item $dirList {
         if { $item==$dirName } {
@@ -59,6 +35,7 @@ proc is_member { dirList dirName } {
     return false
 }
 
+# This will return all the required sub directories based of input fileList
 proc findDirs { fileList } {
     set dirList {}  
     puts [llength $fileList]  
@@ -85,12 +62,14 @@ proc load_List { ListName {fileName "debug.dat"} } {
 
 }
 
+# This will return project Name from srcDir path
 proc getProjName { srcDir } {
     # Find project dir Name
     set projectDir [ split $srcDir "/" ]
     return  [lindex $projectDir [ expr { [ llength $projectDir ] - 1 } ] ]       
 }
 
+# This will return new Project Name from srcDir
 proc getProjName_New { srcDir } {
     # Find project dir Name
     set projDir [getProjName $srcDir] 
@@ -98,7 +77,7 @@ proc getProjName_New { srcDir } {
 }
 
 
-# create dir structure in Downloads dir
+# create dir structure in New_$srdDir directory
 proc copyProjDirStructure { srcDir fileType debugFile } {
 
     set fileList [ findFiles $srcDir $fileType ]
@@ -111,7 +90,7 @@ proc copyProjDirStructure { srcDir fileType debugFile } {
     # Find project dir Name
     set projName     [getProjName $srcDir] 
     set projName_New [getProjName_New $srcDir]
-    puts $projName_New
+    puts " original Proj: $projName , New Proj : $projName_New"
     foreach item $dirList {
         lappend dirList_new [string map [ list $projName $projName_New ]  $item ]
     }    
@@ -124,15 +103,6 @@ proc copyProjDirStructure { srcDir fileType debugFile } {
         }
     }
     
-    return $fileList
-}
-
-proc copyProjFiles { srcDir fileList } {
-    
-    # Find project dir Name
-    set projName     [getProjName $srcDir] 
-    set projName_New [getProjName_New $srcDir]
-
     foreach item $fileList {
         set new_File_Path [string map [ list $projName $projName_New ]  $item ]
         if { [ file isdirectory [ file dirname $new_File_Path ]  ] } {
@@ -141,7 +111,8 @@ proc copyProjFiles { srcDir fileList } {
             file mkdir [ file dirname $new_File_Path ]
             file copy $item $new_File_Path
         }
-    }  
+    } 
+
 }
 
 
@@ -151,42 +122,41 @@ proc copyProjFiles { srcDir fileList } {
 # ****************************************** Main Function ******************************************************
 
 
-            # Set the baseDir to project path
-            # Set fileType_To_Search to desired file that user want to copy from project directory
-            # Script will create new poject with same Name with New_ as prefix added to it @ same dir level
+    # Set the baseDir to project path
+    # Set fileType_To_Search to desired file that user want to copy from project directory
+    # Script will create new poject with same Name with New_ as prefix added to it @ same dir level
 
-                set systemTime [clock seconds]
-                set desired_Format [clock format $systemTime -format {%H_%M_%S} ]
+        set systemTime [clock seconds]
+        set desired_Format [clock format $systemTime -format {%H_%M_%S} ]
 
-                if { $argc < 1} {
-                    puts " \n\n******************** User must define at least project Dir Path ****************************\n\n"
-                    puts " \n\n********************             Use case Example               ****************************\n\n"
-                    puts "tclsh file_IO_command.tcl /home/Project/INIPARSER\n\n"
-                } else {
-                
-                    set baseDir [lindex $argv 0] 
+        if { $argc < 1} {
+            puts " \n\n******************** User must define at least project Dir Path ****************************\n\n"
+            puts " \n\n********************             Use case Example               ****************************\n\n"
+            puts "tclsh file_IO_command.tcl /home/ssingh/Documents/Project/embeddedsw *.c *.h \n\n"            
+        } else {
+        
+            set baseDir [lindex $argv 0] 
 
-                    if { $argc > 1 } {
-                        set fileType_To_Search {}
-                        set skipFirst true
-                        foreach item $argv {
-                            if {  $skipFirst != "true"  } {
-                                puts "$item "
-                                lappend fileType_To_Search $item 
-                            }
-                            set skipFirst false
-                        }
-                    } else {
-                        # List of file type to search in base Dir
-                        puts "I m here"
-                        set fileType_To_Search {*.tcl *.txt }   
+            if { $argc > 1 } {
+                set fileType_To_Search {}
+                set skipFirst true
+                foreach item $argv {
+                    if {  $skipFirst != "true"  } {
+                        puts "$item "
+                        lappend fileType_To_Search $item 
                     }
-                    foreach item $fileType_To_Search {
-                        
-                        set fileToWrite [concat ../debug_Files/Debug_[ string trim $item *. ]_$desired_Format.dat]                        
-                        copyProjFiles $baseDir [ copyProjDirStructure $baseDir $item $fileToWrite ]
-                    }
+                    set skipFirst false
                 }
+            } else {
+                # List of file type to search in base Dir
+                set fileType_To_Search {*.tcl *.txt }   
+            }
+            foreach item $fileType_To_Search {
+                
+                set fileToWrite [concat ../debug_Files/Debug_[ string trim $item *. ]_$desired_Format.dat]                        
+                copyProjDirStructure $baseDir $item $fileToWrite
+            }
+        }
 
 
 # ****************************************** End Function ******************************************************
